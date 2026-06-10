@@ -28,10 +28,14 @@ public class CreditoController {
     @GetMapping("/paginado")
     public Page<Credito> listarPaginado(@RequestParam(defaultValue = "") String nombre,
                                          @RequestParam(required = false) Long idEmpleado,
+                                         @RequestParam(required = false) Long idSocio,
                                          @RequestParam(defaultValue = "0") int page,
                                          @RequestParam(defaultValue = "10") int size) {
         if (!nombre.isBlank() && idEmpleado != null) {
             return service.buscarPorNombreClienteYPrestamista(nombre, idEmpleado, page, size);
+        }
+        if (!nombre.isBlank() && idSocio != null) {
+            return service.buscarPorNombreClienteYSocio(nombre, idSocio, page, size);
         }
         if (!nombre.isBlank()) {
             return service.buscarPorNombreCliente(nombre, page, size);
@@ -39,23 +43,28 @@ public class CreditoController {
         if (idEmpleado != null) {
             return service.listarPorPrestamista(idEmpleado, page, size);
         }
+        if (idSocio != null) {
+            return service.listarPorSocio(idSocio, page, size);
+        }
         return service.listarPaginado(page, size);
     }
 
     @GetMapping("/por-estado")
     public CreditoPaginadoResponse listarPorEstado(@RequestParam(required = false) String estado,
                                                     @RequestParam(required = false) Long idEmpleado,
+                                                    @RequestParam(required = false) Long idSocio,
                                                     @RequestParam(defaultValue = "0") int page,
                                                     @RequestParam(defaultValue = "10") int size) {
-        return service.listarPorEstadoConContadores(estado, idEmpleado, page, size);
+        return service.listarPorEstadoConContadores(estado, idEmpleado, idSocio, page, size);
     }
 
     @GetMapping("/cliente/{clienteId}")
     public Page<Credito> buscarPorCliente(@PathVariable Long clienteId,
                                            @RequestParam(required = false) Long idEmpleado,
+                                           @RequestParam(required = false) Long idSocio,
                                            @RequestParam(defaultValue = "0") int page,
                                            @RequestParam(defaultValue = "10") int size) {
-        return service.buscarPorCliente(clienteId, idEmpleado, page, size);
+        return service.buscarPorCliente(clienteId, idEmpleado, idSocio, page, size);
     }
 
     @GetMapping("/vision-general")

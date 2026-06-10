@@ -32,9 +32,6 @@ public class Cliente {
     @Column(name = "direccion_fiador")
     private String direccionFiador;
 
-    @ManyToOne
-    @JoinColumn(name = "prestamista_id")
-    private Empleado prestamista;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -60,6 +57,4 @@ public class Cliente {
     public void setCelularFiador(String celularFiador) { this.celularFiador = celularFiador; }
     public String getDireccionFiador() { return direccionFiador; }
     public void setDireccionFiador(String direccionFiador) { this.direccionFiador = direccionFiador; }
-    public Empleado getPrestamista() { return prestamista; }
-    public void setPrestamista(Empleado prestamista) { this.prestamista = prestamista; }
 }

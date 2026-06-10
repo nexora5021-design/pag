@@ -22,10 +22,6 @@ public class ClienteService {
         return repository.findAll();
     }
 
-    public List<Cliente> listarPorPrestamista(Long idEmpleado) {
-        return repository.findByPrestamistaId(idEmpleado);
-    }
-
     public Page<Cliente> listarPaginado(int page, int size) {
         return repository.findAll(PageRequest.of(page, size));
     }

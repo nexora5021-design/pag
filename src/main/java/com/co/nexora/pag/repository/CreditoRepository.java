@@ -21,6 +21,12 @@ public interface CreditoRepository extends JpaRepository<Credito, Long> {
     long countByPrestamistaId(Long prestamistaId);
     long countByEstadoAndPrestamistaId(String estado, Long prestamistaId);
     Page<Credito> findByClienteId(Long clienteId, Pageable pageable);
+    Page<Credito> findBySocioId(Long socioId, Pageable pageable);
+    Page<Credito> findByEstadoIgnoreCaseAndSocioId(String estado, Long socioId, Pageable pageable);
+    Page<Credito> findByClienteNombreContainingIgnoreCaseAndSocioId(String nombre, Long socioId, Pageable pageable);
+    Page<Credito> findByClienteIdAndSocioId(Long clienteId, Long socioId, Pageable pageable);
+    long countBySocioId(Long socioId);
+    long countByEstadoAndSocioId(String estado, Long socioId);
     List<Credito> findByEstadoAndProximaCuotaBefore(String estado, LocalDate fecha);
 
     @Query("SELECT COALESCE(SUM(c.interesRecaudado), 0) FROM Credito c WHERE YEAR(c.fechaDesembolso) = :anio")

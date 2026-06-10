@@ -19,10 +19,7 @@ public class ClienteController {
     }
 
     @GetMapping
-    public List<Cliente> listarTodos(@RequestParam(required = false) Long idEmpleado) {
-        if (idEmpleado != null) {
-            return service.listarPorPrestamista(idEmpleado);
-        }
+    public List<Cliente> listarTodos() {
         return service.listarTodos();
     }
 

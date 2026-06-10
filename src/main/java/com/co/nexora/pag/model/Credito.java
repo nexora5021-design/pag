@@ -36,6 +36,10 @@ public class Credito {
     @JoinColumn(name = "prestamista_id")
     private Empleado prestamista;
 
+    @ManyToOne
+    @JoinColumn(name = "socio_id")
+    private Socio socio;
+
     @Column(name = "primera_cuota")
     private LocalDate primeraCuota;
 
@@ -75,6 +79,8 @@ public class Credito {
     public void setFechaDesembolso(LocalDate fechaDesembolso) { this.fechaDesembolso = fechaDesembolso; }
     public Empleado getPrestamista() { return prestamista; }
     public void setPrestamista(Empleado prestamista) { this.prestamista = prestamista; }
+    public Socio getSocio() { return socio; }
+    public void setSocio(Socio socio) { this.socio = socio; }
     public LocalDate getPrimeraCuota() { return primeraCuota; }
     public void setPrimeraCuota(LocalDate primeraCuota) { this.primeraCuota = primeraCuota; }
     public String getTitulo() { return titulo; }

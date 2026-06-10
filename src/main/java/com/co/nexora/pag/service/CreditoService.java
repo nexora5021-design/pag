@@ -44,18 +44,32 @@ public class CreditoService {
         return repository.findByPrestamistaId(idEmpleado, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
     }
 
-    public CreditoPaginadoResponse listarPorEstadoConContadores(String estado, Long idEmpleado, int page, int size) {
+    public Page<Credito> listarPorSocio(Long idSocio, int page, int size) {
+        return repository.findBySocioId(idSocio, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
+    }
+
+    public Page<Credito> buscarPorNombreClienteYSocio(String nombre, Long idSocio, int page, int size) {
+        return repository.findByClienteNombreContainingIgnoreCaseAndSocioId(nombre, idSocio, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
+    }
+
+    public CreditoPaginadoResponse listarPorEstadoConContadores(String estado, Long idEmpleado, Long idSocio, int page, int size) {
         Page<Credito> creditos;
         boolean sinEstado = (estado == null || estado.isBlank() || estado.equalsIgnoreCase("null"));
+        Long filtroId = idEmpleado != null ? idEmpleado : idSocio;
+        boolean filtrarPorSocio = idEmpleado == null && idSocio != null;
 
-        if (sinEstado && idEmpleado == null) {
+        if (sinEstado && filtroId == null) {
             creditos = repository.findAll(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
+        } else if (sinEstado && filtrarPorSocio) {
+            creditos = repository.findBySocioId(filtroId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
         } else if (sinEstado) {
-            creditos = repository.findByPrestamistaId(idEmpleado, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
-        } else if (idEmpleado == null) {
+            creditos = repository.findByPrestamistaId(filtroId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
+        } else if (filtroId == null) {
             creditos = repository.findByEstadoIgnoreCase(estado, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
+        } else if (filtrarPorSocio) {
+            creditos = repository.findByEstadoIgnoreCaseAndSocioId(estado, filtroId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
         } else {
-            creditos = repository.findByEstadoIgnoreCaseAndPrestamistaId(estado, idEmpleado, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
+            creditos = repository.findByEstadoIgnoreCaseAndPrestamistaId(estado, filtroId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
         }
 
         long total;
@@ -63,11 +77,16 @@ public class CreditoService {
         long totalMora;
         long finalizados;
 
-        if (idEmpleado != null) {
-            total = repository.countByPrestamistaId(idEmpleado);
-            progress = repository.countByEstadoAndPrestamistaId("En progreso", idEmpleado);
-            totalMora = repository.countByEstadoAndPrestamistaId("En mora", idEmpleado);
-            finalizados = repository.countByEstadoAndPrestamistaId("Finalizado", idEmpleado);
+        if (filtrarPorSocio) {
+            total = repository.countBySocioId(filtroId);
+            progress = repository.countByEstadoAndSocioId("En progreso", filtroId);
+            totalMora = repository.countByEstadoAndSocioId("En mora", filtroId);
+            finalizados = repository.countByEstadoAndSocioId("Finalizado", filtroId);
+        } else if (filtroId != null) {
+            total = repository.countByPrestamistaId(filtroId);
+            progress = repository.countByEstadoAndPrestamistaId("En progreso", filtroId);
+            totalMora = repository.countByEstadoAndPrestamistaId("En mora", filtroId);
+            finalizados = repository.countByEstadoAndPrestamistaId("Finalizado", filtroId);
         } else {
             total = repository.count();
             progress = repository.countByEstado("En progreso");
@@ -82,9 +101,12 @@ public class CreditoService {
         return repository.findByEstadoIgnoreCase(estado, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
     }
 
-    public Page<Credito> buscarPorCliente(Long clienteId, Long idEmpleado, int page, int size) {
+    public Page<Credito> buscarPorCliente(Long clienteId, Long idEmpleado, Long idSocio, int page, int size) {
         if (idEmpleado != null) {
             return repository.findByClienteIdAndPrestamistaId(clienteId, idEmpleado, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
+        }
+        if (idSocio != null) {
+            return repository.findByClienteIdAndSocioId(clienteId, idSocio, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
         }
         return repository.findByClienteId(clienteId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
     }
