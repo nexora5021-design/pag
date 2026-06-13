@@ -23,14 +23,6 @@ public class Cliente {
     @Column(name = "creditos_activos")
     private Integer creditosActivos;
 
-    @Column(name = "nombre_fiador")
-    private String nombreFiador;
-
-    @Column(name = "celular_fiador")
-    private String celularFiador;
-
-    @Column(name = "direccion_fiador")
-    private String direccionFiador;
 
 
     public Long getId() { return id; }
@@ -51,10 +43,4 @@ public class Cliente {
     public void setCreditos(Integer creditos) { this.creditos = creditos; }
     public Integer getCreditosActivos() { return creditosActivos; }
     public void setCreditosActivos(Integer creditosActivos) { this.creditosActivos = creditosActivos; }
-    public String getNombreFiador() { return nombreFiador; }
-    public void setNombreFiador(String nombreFiador) { this.nombreFiador = nombreFiador; }
-    public String getCelularFiador() { return celularFiador; }
-    public void setCelularFiador(String celularFiador) { this.celularFiador = celularFiador; }
-    public String getDireccionFiador() { return direccionFiador; }
-    public void setDireccionFiador(String direccionFiador) { this.direccionFiador = direccionFiador; }
 }

@@ -92,6 +92,15 @@ public class CreditoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PutMapping("/{id}/movimiento")
+    public ResponseEntity<Credito> registrarMovimiento(@PathVariable Long id, @RequestBody java.util.Map<String, Object> body) {
+        String accion = (String) body.get("accion");
+        Double valor = body.get("valor") != null ? ((Number) body.get("valor")).doubleValue() : null;
+        return service.registrarMovimiento(id, accion, valor)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         return service.buscarPorId(id)

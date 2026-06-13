@@ -13,9 +13,11 @@ import java.util.Optional;
 public class ClienteService {
 
     private final ClienteRepository repository;
+    private final CreditoService creditoService;
 
-    public ClienteService(ClienteRepository repository) {
+    public ClienteService(ClienteRepository repository, CreditoService creditoService) {
         this.repository = repository;
+        this.creditoService = creditoService;
     }
 
     public List<Cliente> listarTodos() {
@@ -44,6 +46,7 @@ public class ClienteService {
     }
 
     public void eliminar(Long id) {
+        creditoService.desasociarCliente(id);
         repository.deleteById(id);
     }
 }

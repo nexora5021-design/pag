@@ -17,11 +17,13 @@ public class SocioService {
     private final SocioRepository repository;
     private final EmpleadoRepository empleadoRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CreditoService creditoService;
 
-    public SocioService(SocioRepository repository, EmpleadoRepository empleadoRepository, PasswordEncoder passwordEncoder) {
+    public SocioService(SocioRepository repository, EmpleadoRepository empleadoRepository, PasswordEncoder passwordEncoder, CreditoService creditoService) {
         this.repository = repository;
         this.empleadoRepository = empleadoRepository;
         this.passwordEncoder = passwordEncoder;
+        this.creditoService = creditoService;
     }
 
     public List<Socio> listarTodos() {
@@ -62,6 +64,7 @@ public class SocioService {
     }
 
     public void eliminar(Long id) {
+        creditoService.desasociarSocio(id);
         repository.deleteById(id);
     }
 }

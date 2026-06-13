@@ -20,14 +20,8 @@ public class Credito {
     @Column(name = "monto_prestado")
     private Double montoPrestado;
 
-    @Column(name = "tipo_credito")
-    private String tipoCredito;
-
     private Double interes;
-    private Integer cuotas;
-
-    @Column(name = "valor_cuota")
-    private Double valorCuota;
+    private Integer meses;
 
     @Column(name = "fecha_desembolso")
     private LocalDate fechaDesembolso;
@@ -40,17 +34,14 @@ public class Credito {
     @JoinColumn(name = "socio_id")
     private Socio socio;
 
-    @Column(name = "primera_cuota")
-    private LocalDate primeraCuota;
-
     private String titulo;
     private String estado;
 
-    @Column(name = "proxima_cuota")
-    private LocalDate proximaCuota;
+    @Column(name = "fecha_corte")
+    private LocalDate fechaCorte;
 
-    @Column(name = "cuota_actual")
-    private Integer cuotaActual;
+    @Column(name = "mes_actual")
+    private Integer mesActual;
 
     @Column(name = "ganancia_estimada")
     private Double gananciaEstimada;
@@ -58,8 +49,19 @@ public class Credito {
     @Column(name = "capital_pendiente")
     private Double capitalPendiente;
 
-    @Column(name = "interes_recaudado")
-    private Double interesRecaudado;
+    @Column(name = "interes_pendiente")
+    private Double interesPendiente;
+
+    private Double ganancias;
+
+    @Column(name = "nombre_cliente")
+    private String nombreCliente;
+
+    @Column(name = "nombre_prestamista")
+    private String nombrePrestamista;
+
+    @Column(name = "nombre_socio")
+    private String nombreSocio;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -67,34 +69,36 @@ public class Credito {
     public void setCliente(Cliente cliente) { this.cliente = cliente; }
     public Double getMontoPrestado() { return montoPrestado; }
     public void setMontoPrestado(Double montoPrestado) { this.montoPrestado = montoPrestado; }
-    public String getTipoCredito() { return tipoCredito; }
-    public void setTipoCredito(String tipoCredito) { this.tipoCredito = tipoCredito; }
     public Double getInteres() { return interes; }
     public void setInteres(Double interes) { this.interes = interes; }
-    public Integer getCuotas() { return cuotas; }
-    public void setCuotas(Integer cuotas) { this.cuotas = cuotas; }
-    public Double getValorCuota() { return valorCuota; }
-    public void setValorCuota(Double valorCuota) { this.valorCuota = valorCuota; }
+    public Integer getMeses() { return meses; }
+    public void setMeses(Integer meses) { this.meses = meses; }
     public LocalDate getFechaDesembolso() { return fechaDesembolso; }
     public void setFechaDesembolso(LocalDate fechaDesembolso) { this.fechaDesembolso = fechaDesembolso; }
     public Empleado getPrestamista() { return prestamista; }
     public void setPrestamista(Empleado prestamista) { this.prestamista = prestamista; }
     public Socio getSocio() { return socio; }
     public void setSocio(Socio socio) { this.socio = socio; }
-    public LocalDate getPrimeraCuota() { return primeraCuota; }
-    public void setPrimeraCuota(LocalDate primeraCuota) { this.primeraCuota = primeraCuota; }
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
-    public LocalDate getProximaCuota() { return proximaCuota; }
-    public void setProximaCuota(LocalDate proximaCuota) { this.proximaCuota = proximaCuota; }
-    public Integer getCuotaActual() { return cuotaActual; }
-    public void setCuotaActual(Integer cuotaActual) { this.cuotaActual = cuotaActual; }
+    public LocalDate getFechaCorte() { return fechaCorte; }
+    public void setFechaCorte(LocalDate fechaCorte) { this.fechaCorte = fechaCorte; }
+    public Integer getMesActual() { return mesActual; }
+    public void setMesActual(Integer mesActual) { this.mesActual = mesActual; }
     public Double getGananciaEstimada() { return gananciaEstimada; }
     public void setGananciaEstimada(Double gananciaEstimada) { this.gananciaEstimada = gananciaEstimada; }
     public Double getCapitalPendiente() { return capitalPendiente; }
     public void setCapitalPendiente(Double capitalPendiente) { this.capitalPendiente = capitalPendiente; }
-    public Double getInteresRecaudado() { return interesRecaudado; }
-    public void setInteresRecaudado(Double interesRecaudado) { this.interesRecaudado = interesRecaudado; }
+    public Double getInteresPendiente() { return interesPendiente; }
+    public void setInteresPendiente(Double interesPendiente) { this.interesPendiente = interesPendiente; }
+    public Double getGanancias() { return ganancias; }
+    public void setGanancias(Double ganancias) { this.ganancias = ganancias; }
+    public String getNombreCliente() { return nombreCliente; }
+    public void setNombreCliente(String nombreCliente) { this.nombreCliente = nombreCliente; }
+    public String getNombrePrestamista() { return nombrePrestamista; }
+    public void setNombrePrestamista(String nombrePrestamista) { this.nombrePrestamista = nombrePrestamista; }
+    public String getNombreSocio() { return nombreSocio; }
+    public void setNombreSocio(String nombreSocio) { this.nombreSocio = nombreSocio; }
 }

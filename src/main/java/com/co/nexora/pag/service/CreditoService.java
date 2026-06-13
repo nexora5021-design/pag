@@ -116,48 +116,25 @@ public class CreditoService {
     }
 
     public Credito crear(Credito credito) {
-        if (credito.getMontoPrestado() != null && credito.getInteres() != null && credito.getCuotas() != null && credito.getCuotas() > 0) {
-            double p = credito.getMontoPrestado();
-            double tasaMensual = credito.getInteres() / 100;
-            int n = credito.getCuotas();
-            int cuotasPorMes;
-            if ("semanal".equalsIgnoreCase(credito.getTipoCredito())) {
-                cuotasPorMes = 4;
-            } else if ("quincenal".equalsIgnoreCase(credito.getTipoCredito())) {
-                cuotasPorMes = 2;
-            } else {
-                cuotasPorMes = 1;
-            }
-
-            double capitalPorCuota = p / n;
-            double saldo = p;
-            double totalIntereses = 0;
-            double primeraCuotaValor = 0;
-            int cuotasProcesadas = 0;
-
-            while (cuotasProcesadas < n) {
-                double interesMes = saldo * tasaMensual;
-                int cuotasRestantes = n - cuotasProcesadas;
-                int cuotasEsteMes = Math.min(cuotasPorMes, cuotasRestantes);
-                double interesPorCuota = interesMes / cuotasEsteMes;
-
-                for (int j = 0; j < cuotasEsteMes; j++) {
-                    totalIntereses += interesPorCuota;
-                    if (cuotasProcesadas == 0) {
-                        primeraCuotaValor = capitalPorCuota + interesPorCuota;
-                    }
-                    cuotasProcesadas++;
-                }
-                saldo -= capitalPorCuota * cuotasEsteMes;
-            }
-
-            credito.setValorCuota(Math.round(primeraCuotaValor * 100.0) / 100.0);
-            credito.setGananciaEstimada(Math.round(totalIntereses * 100.0) / 100.0);
-        }
-        credito.setProximaCuota(credito.getPrimeraCuota());
-        credito.setCuotaActual(0);
+        double porcentaje = credito.getInteres() != null ? credito.getInteres() / 100 : 0.0;
+        double intereses = credito.getMontoPrestado() != null ? Math.round(credito.getMontoPrestado() * porcentaje * 100.0) / 100.0 : 0.0;
+        credito.setGananciaEstimada(intereses);
+        credito.setInteresPendiente(intereses);
+        credito.setGanancias(0.0);
+        credito.setMesActual(1);
         credito.setCapitalPendiente(credito.getMontoPrestado());
-        credito.setInteresRecaudado(0.0);
+        if (credito.getFechaDesembolso() != null) {
+            credito.setFechaCorte(credito.getFechaDesembolso().plusDays(30));
+        }
+        if (credito.getCliente() != null && credito.getCliente().getNombre() != null) {
+            credito.setNombreCliente(credito.getCliente().getNombre());
+        }
+        if (credito.getPrestamista() != null && credito.getPrestamista().getNombre() != null) {
+            credito.setNombrePrestamista(credito.getPrestamista().getNombre());
+        }
+        if (credito.getSocio() != null && credito.getSocio().getNombre() != null) {
+            credito.setNombreSocio(credito.getSocio().getNombre());
+        }
         Credito saved = repository.save(credito);
         saved.setTitulo("Credito " + saved.getId());
         return repository.save(saved);
@@ -165,90 +142,44 @@ public class CreditoService {
 
     public Credito actualizar(Long id, Credito credito) {
         credito.setId(id);
+        if (credito.getFechaDesembolso() != null) {
+            credito.setFechaCorte(credito.getFechaDesembolso().plusDays(30));
+        }
         Optional<Credito> existente = repository.findById(id);
         if (existente.isPresent()) {
             Credito actual = existente.get();
 
-            if (credito.getCuotaActual() != null && actual.getCuotaActual() != null
-                    && credito.getCuotaActual() > actual.getCuotaActual()) {
+            if (credito.getMesActual() != null && actual.getMesActual() != null
+                    && credito.getMesActual() > actual.getMesActual()) {
 
-                int nuevaCuotaActual = credito.getCuotaActual();
+                int nuevoMesActual = credito.getMesActual();
                 double tasaMensual = actual.getInteres() / 100;
-                int cuotasPorMes;
-                if ("semanal".equalsIgnoreCase(actual.getTipoCredito())) {
-                    cuotasPorMes = 4;
-                } else if ("quincenal".equalsIgnoreCase(actual.getTipoCredito())) {
-                    cuotasPorMes = 2;
-                } else {
-                    cuotasPorMes = 1;
-                }
-
-                double capitalPorCuota = actual.getMontoPrestado() / actual.getCuotas();
+                double capitalPorMes = actual.getMontoPrestado() / actual.getMeses();
                 double saldo = actual.getMontoPrestado();
-                double interesTotal = 0;
-                int cuotasProcesadas = 0;
+                double interesPagado = 0;
 
-                while (cuotasProcesadas < nuevaCuotaActual) {
-                    double interesMes = saldo * tasaMensual;
-                    int cuotasRestantesTotal = actual.getCuotas() - cuotasProcesadas;
-                    int cuotasEsteMes = Math.min(cuotasPorMes, cuotasRestantesTotal);
-                    double interesPorCuota = interesMes / cuotasEsteMes;
-                    int cuotasAProcesar = Math.min(cuotasEsteMes, nuevaCuotaActual - cuotasProcesadas);
-
-                    for (int j = 0; j < cuotasAProcesar; j++) {
-                        interesTotal += interesPorCuota;
-                        cuotasProcesadas++;
-                    }
-                    saldo -= capitalPorCuota * cuotasAProcesar;
+                for (int i = 0; i < nuevoMesActual; i++) {
+                    interesPagado += saldo * tasaMensual;
+                    saldo -= capitalPorMes;
                 }
 
                 credito.setCapitalPendiente(Math.round(saldo * 100.0) / 100.0);
-                credito.setInteresRecaudado(Math.round(interesTotal * 100.0) / 100.0);
+                credito.setInteresPendiente(Math.round((actual.getGananciaEstimada() - interesPagado) * 100.0) / 100.0);
 
-                // Calcular valor de la siguiente cuota
-                if (cuotasProcesadas < actual.getCuotas()) {
-                    // Determinar el saldo al inicio del mes actual de la siguiente cuota
-                    double saldoParaSiguiente = actual.getMontoPrestado();
-                    int cuotasRecorridas = 0;
-                    double interesSiguienteCuota = 0;
-
-                    while (cuotasRecorridas <= cuotasProcesadas) {
-                        double interesMesCalc = saldoParaSiguiente * tasaMensual;
-                        int cuotasRestantesCalc = actual.getCuotas() - cuotasRecorridas;
-                        int cuotasEsteMesCalc = Math.min(cuotasPorMes, cuotasRestantesCalc);
-                        interesSiguienteCuota = interesMesCalc / cuotasEsteMesCalc;
-
-                        if (cuotasRecorridas + cuotasEsteMesCalc > cuotasProcesadas) {
-                            // La siguiente cuota está en este mes
-                            break;
-                        }
-                        saldoParaSiguiente -= capitalPorCuota * cuotasEsteMesCalc;
-                        cuotasRecorridas += cuotasEsteMesCalc;
-                    }
-
-                    credito.setValorCuota(Math.round((capitalPorCuota + interesSiguienteCuota) * 100.0) / 100.0);
+                // Actualizar fecha de corte
+                LocalDate fechaCorte = actual.getFechaCorte();
+                int mesesAvanzados = nuevoMesActual - actual.getMesActual();
+                if (fechaCorte != null) {
+                    fechaCorte = fechaCorte.plusMonths(mesesAvanzados);
+                    credito.setFechaCorte(fechaCorte);
                 }
 
-                // Actualizar próxima cuota
-                int cuotasPagadasNuevas = credito.getCuotaActual() - actual.getCuotaActual();
-                LocalDate proximaCuota = actual.getProximaCuota() != null ? actual.getProximaCuota() : actual.getPrimeraCuota();
-                for (int i = 0; i < cuotasPagadasNuevas; i++) {
-                    if ("semanal".equalsIgnoreCase(actual.getTipoCredito())) {
-                        proximaCuota = proximaCuota.plusDays(7);
-                    } else if ("quincenal".equalsIgnoreCase(actual.getTipoCredito())) {
-                        proximaCuota = proximaCuota.plusDays(15);
-                    } else {
-                        proximaCuota = proximaCuota.plusDays(30);
-                    }
-                }
-                credito.setProximaCuota(proximaCuota);
-
-                // Si cuotaActual == cuotas, finalizar
-                if (credito.getCuotaActual().equals(actual.getCuotas())) {
+                // Si mesActual == meses, finalizar
+                if (credito.getMesActual().equals(actual.getMeses())) {
                     credito.setEstado("Finalizado");
                 } else if ("En mora".equalsIgnoreCase(actual.getEstado())) {
                     LocalDate hoy = LocalDate.now(ZoneId.of("America/Bogota"));
-                    if (proximaCuota.isAfter(hoy)) {
+                    if (fechaCorte != null && fechaCorte.isAfter(hoy)) {
                         credito.setEstado("En progreso");
                     }
                 }
@@ -259,6 +190,63 @@ public class CreditoService {
 
     public void eliminar(Long id) {
         repository.deleteById(id);
+    }
+
+    public Optional<Credito> registrarMovimiento(Long id, String accion, Double valor) {
+        Optional<Credito> opt = repository.findById(id);
+        if (opt.isEmpty()) return opt;
+        Credito credito = opt.get();
+
+        if ("abono capital".equalsIgnoreCase(accion)) {
+            credito.setCapitalPendiente(Math.round((credito.getCapitalPendiente() - valor) * 100.0) / 100.0);
+            if (credito.getCapitalPendiente() <= 0 && credito.getInteresPendiente() <= 0) {
+                credito.setEstado("Finalizado");
+            } else if ("En mora".equalsIgnoreCase(credito.getEstado())) {
+                credito.setEstado("En progreso");
+            }
+        } else if ("pago intereses".equalsIgnoreCase(accion)) {
+            credito.setInteresPendiente(Math.round((credito.getInteresPendiente() - valor) * 100.0) / 100.0);
+            credito.setGanancias(Math.round((credito.getGanancias() + valor) * 100.0) / 100.0);
+            if (credito.getCapitalPendiente() <= 0 && credito.getInteresPendiente() <= 0) {
+                credito.setEstado("Finalizado");
+            } else if ("En mora".equalsIgnoreCase(credito.getEstado())) {
+                credito.setEstado("En progreso");
+            }
+        } else if ("nuevo corte".equalsIgnoreCase(accion)) {
+            double deudaTotal = credito.getCapitalPendiente() + credito.getInteresPendiente();
+            double nuevoInteres = deudaTotal * (credito.getInteres() / 100);
+            credito.setInteresPendiente(Math.round((credito.getInteresPendiente() + nuevoInteres) * 100.0) / 100.0);
+            credito.setGananciaEstimada(Math.round((credito.getGananciaEstimada() + nuevoInteres) * 100.0) / 100.0);
+            credito.setMesActual(credito.getMesActual() + 1);
+            credito.setFechaCorte(credito.getFechaCorte().plusDays(30));
+            credito.setEstado("En mora");
+        }
+
+        return Optional.of(repository.save(credito));
+    }
+
+    public void desasociarPrestamista(Long prestamistaId) {
+        List<Credito> creditos = repository.findByPrestamistaId(prestamistaId);
+        for (Credito c : creditos) {
+            c.setPrestamista(null);
+            repository.save(c);
+        }
+    }
+
+    public void desasociarSocio(Long socioId) {
+        List<Credito> creditos = repository.findBySocioId(socioId);
+        for (Credito c : creditos) {
+            c.setSocio(null);
+            repository.save(c);
+        }
+    }
+
+    public void desasociarCliente(Long clienteId) {
+        List<Credito> creditos = repository.findByClienteId(clienteId);
+        for (Credito c : creditos) {
+            c.setCliente(null);
+            repository.save(c);
+        }
     }
 
     public VisionGeneralResponse obtenerVisionGeneral() {
